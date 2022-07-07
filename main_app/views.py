@@ -28,9 +28,11 @@ def cats_index(request):
 def cats_detail(request, cat_id):
   cat = Cat.objects.get(id=cat_id)
   feeding_form = FeedingForm()
+  toys_cat_doesnt_have = Toy.objects.exclude(id__in = cat.toys.all().values_list('id'))
   return render(request, 'cats/detail.html', {
     # include the cat and feeding_form in the context
-    'cat': cat, 'feeding_form': feeding_form
+    'cat': cat, 'feeding_form': feeding_form,
+    'toys': toys_cat_doesnt_have
   })
 
 def add_feeding(request, cat_id):
@@ -45,16 +47,23 @@ def add_feeding(request, cat_id):
     new_feeding.save()
   return redirect('detail', cat_id=cat_id)
 
+def assoc_toy(request, cat_id, toy_id):
+  Cat.objects.get(id=cat_id).toys.add(toy_id)
+  return redirect('detail', cat_id=cat_id)
+
+def assoc_toy_delete(request, cat_id, toy_id):
+  Cat.objects.get(id=cat_id).toys.remove(toy_id)
+  return redirect('detail', cat_id=cat_id)
 
 class CatCreate(CreateView):
   model = Cat
-  fields = '__all__'
+  fields = ['name', 'breed', 'description', 'age']
   success_url = '/cats/'
 
 class CatUpdate(UpdateView):
   model = Cat
   # Let's disallow the renaming of a cat by excluding the name field!
-  fields = ['breed', 'description', 'age']
+  fields = [ 'breed', 'description', 'age']
 
 class CatDelete(DeleteView):
   model = Cat
