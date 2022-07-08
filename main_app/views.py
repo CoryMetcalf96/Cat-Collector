@@ -89,6 +89,11 @@ class CatCreate(CreateView):
   fields = ['name', 'breed', 'description', 'age']
   success_url = '/cats/'
 
+  # Assign the logged-in user as the user associated with the created cat
+  def form_valid(self, form):
+    form.instance.user = self.request.user
+    return super().form_valid(form)
+
 class CatUpdate(UpdateView):
   model = Cat
   # Let's disallow the renaming of a cat by excluding the name field!
